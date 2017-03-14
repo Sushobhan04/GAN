@@ -56,7 +56,7 @@ H = Activation('relu')(H)
 H = Convolution2D(1, 1, 1, border_mode='same', init='glorot_uniform')(H)
 g_V = Activation('sigmoid')(H)
 generator = Model(g_input,g_V)
-generator.compile(loss='binary_crossentropy', optimizer=opt)
+generator.compile(loss='binary_crossentropy', optimizer='adam')
 generator.summary()
 
 input_g = np.random.random((nb_samples,100))
