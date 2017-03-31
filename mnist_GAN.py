@@ -16,10 +16,11 @@ from keras.layers.convolutional import (
     AveragePooling2D
 )
 from keras.layers.normalization import BatchNormalization
+from keras.layers.advanced_activations import LeakyReLU
 from keras import backend as K
 import numpy as np
 import h5py
-from keras.optimizers import SGD, Adadelta
+from keras.optimizers import SGD, Adadelta, Adam
 from keras.utils import np_utils
 from keras import callbacks
 from keras.callbacks import LearningRateScheduler,EarlyStopping
@@ -57,12 +58,13 @@ H = Convolution2D(1, 1, 1, border_mode='same', init='glorot_uniform')(H)
 g_V = Activation('sigmoid')(H)
 generator = Model(g_input,g_V)
 generator.compile(loss='binary_crossentropy', optimizer='adam')
-generator.summary()
+# generator.summary()
 
 input_g = np.random.random((nb_samples,100))
 
 # Build Discriminative model ...
 shp = (1,28,28)
+dropout_rate = 0.5
 d_input = Input(shape=shp)
 H = Convolution2D(256, 5, 5, subsample=(2, 2), border_mode = 'same', activation='relu')(d_input)
 H = LeakyReLU(0.2)(H)
@@ -76,18 +78,24 @@ H = LeakyReLU(0.2)(H)
 H = Dropout(dropout_rate)(H)
 d_V = Dense(2,activation='softmax')(H)
 
+opt = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+
 discriminator = Model(d_input,d_V)
-discriminator.compile(loss='categorical_crossentropy', optimizer=dopt)
-discriminator.summary()
+discriminator.compile(loss='categorical_crossentropy', optimizer=opt)
+# discriminator.summary()
 
 output_g = generator.predict(input_g)
 label_g = np.zeros((nb_samples,2))
 label_g[:,1] = 1.0
 
-input_train = np.concatenate((x_train,output_g),axis=0)
+print output_g.shape, label_g.shape 
+
+input_train = np.concatenate((np.expand_dims(x_train,axis = 1),output_g),axis=0)
 label_train = np.concatenate((label_t,label_g), axis = 0)
 
-discriminator.fit(input_train, label_train, nb_epoch = 10,verbose=1)
+print input_train.shape, label_train.shape
+
+discriminator.fit(input_train, label_train, nb_epoch = 100,verbose=1)
 
 # Freeze weights in the discriminator for stacked training
 def make_trainable(net, val):
@@ -103,4 +111,5 @@ H = generator(gan_input)
 gan_V = discriminator(H)
 GAN = Model(gan_input, gan_V)
 GAN.compile(loss='categorical_crossentropy', optimizer=opt)
-GAN.summary()
+# GAN.summary()
+GAN.save("GAN.h5")
