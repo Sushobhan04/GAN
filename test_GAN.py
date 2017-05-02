@@ -42,7 +42,7 @@ def BatchGenerator(files,batch_size,dtype = 'train', N=0):
 
 def main():
 
-    path_test = "/home/sushobhan/git/GAN/"
+    path_test = "/home/sushobhan/git/GAN/models/"
     home = "/home/sushobhan/git/GAN/"
     model_name = sys.argv[1]
 
@@ -57,7 +57,7 @@ def main():
 
     for i in range(trails):
         print i
-        cv2.imwrite(home+'output/'+str(i)+'.png',(y_output[i,0]*255)//1)
+        cv2.imwrite(home+'output/'+str(i)+'.png',(y_output[i,0]*127 + 127.0)//1)
 
 
 if __name__ == '__main__':

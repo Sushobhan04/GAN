@@ -85,9 +85,20 @@ def _dense_block(node_arr):
 
     return f
 
+def _dense_relu(node_arr):
+    def f(input):
+        temp = input
+        for nodes in node_arr:
+            temp = Dense(nodes,kernel_initializer=kernel_initializer,kernel_regularizer = kernel_regularizer)(temp)
+            # temp = BatchNormalization(axis=CHANNEL_AXIS)(temp)
+            temp = Activation("relu")(temp)
+        return temp
+
+    return f
+
 def _deconv_block(filters, kernel_size = 3, strides=(2, 2), padding = 'same'):
     def f(input):
-        conv = Conv2DTranspose(filters=filters, kernel_size = (kernel_size,kernel_size), strides=subsample,
+        conv = Conv2DTranspose(filters=filters, kernel_size = (kernel_size,kernel_size), strides=strides,
                              kernel_initializer=kernel_initializer,bias_initializer=bias_initializer, 
                              kernel_regularizer = kernel_regularizer,padding = padding)(input)
         norm = BatchNormalization(axis=CHANNEL_AXIS)(conv)
