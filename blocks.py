@@ -42,8 +42,8 @@ else:
 
 lrate = 0.00001
 
-kernel_initializer = 'he_uniform'
-bias_initializer = "zeros"
+kernel_initializer = 'glorot_uniform'
+bias_initializer = None
 kernel_regularizer=regularizers.l2(0.0005)
 
 def _residual_block(filters, kernel_size = 3, repetitions=1, padding = 'same'):
@@ -103,6 +103,16 @@ def _deconv_block(filters, kernel_size = 3, strides=(2, 2), padding = 'same'):
                              kernel_regularizer = kernel_regularizer,padding = padding)(input)
         norm = BatchNormalization(axis=CHANNEL_AXIS)(conv)
         return Activation("relu")(norm)
+
+    return f
+
+def _deconv_relu(filters, kernel_size = 3, strides=(2, 2), padding = 'same'):
+    def f(input):
+        conv = Conv2DTranspose(filters=filters, kernel_size = (kernel_size,kernel_size), strides=strides,
+                             kernel_initializer=kernel_initializer,bias_initializer=bias_initializer, 
+                             kernel_regularizer = kernel_regularizer,padding = padding)(input)
+        # norm = BatchNormalization(axis=CHANNEL_AXIS)(conv)
+        return Activation("relu")(conv)
 
     return f
 
