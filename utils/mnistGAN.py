@@ -8,6 +8,7 @@ import numpy as np
 import os
 import sys
 import time
+import config
 
 class ConvRelu(nn.Module):
 	def __init__(self,in_channels,out_channnels, kernel_size=3,stride=1,padding=1):
@@ -32,7 +33,7 @@ class Discriminator(nn.Module):
 		self.conv4 = ConvRelu(256,64)
 		self.conv5 = ConvRelu(64,1)
 
-		self.linear1 = nn.ReLU()nn.Linear(28*28,1024)
+		self.linear1 = nn.ReLU()nn.Linear(config.dim_in*config.dim_in,1024)
 		self.linear2 = nn.Linear(1024,1)
 
 	def forward(self,x):
@@ -48,14 +49,13 @@ class Discriminator(nn.Module):
 		return out
 
 class GAN(nn.Module):
-	def __init__(self,lr=0.0001):
+	def __init__(self):
 		super(GAN,self).__init__()
 
 		self.discriminator = Discriminator().cuda()
 		self.mse = nn.MSELoss().cuda()
-		self.lr = lr
-		self.optimizer = torch.optim.Adam(filter(lamda p: p.requires_grad,
-			self.discriminator.parameters()),lr = self.lr)
+		self.optimizer = torch.optim.Adam(self.discriminator.parameters(),
+			lr = config.lr, betas=config.betas)
 		self.loss = None
 
 	def loss(self,y_pred,y):
@@ -64,7 +64,17 @@ class GAN(nn.Module):
 	def load_data(self):
 		train = datasets.MNIST('../data',train=True,download=True)
 		# test = datasets.MNIST('../data',train=False,download=True)
-		self.train_loader = torch.utils.data.DataLoader(train,batch_size=128, shuffle=True)
+		self.train_loader = torch.utils.data.DataLoader(train,batch_size=config.batch_size, shuffle=True)
+
+	def shuffle_data(self,z,x):
+		pass
+
+
+	def create_model(self):
+		z = torch.randn(config.batch_size, config.dim_in, config.dim_in)
+		x = self.train_loader.next()
+
+
 
 	def run_discriminator(self):
 		
