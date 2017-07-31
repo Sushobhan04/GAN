@@ -5,11 +5,16 @@ from torchvision import datasets
 
 
 class Dataset(object):
-	def __init__(self):
+	def __init__(self,dataset):
 		super(Dataset,self).__init__()
-		self.train_loader = None
+		self.dataset = dataset
 
-	def load_data(self):
-		train = datasets.MNIST('../data',train=True,download=True)
-		# test = datasets.MNIST('../data',train=False,download=True)
-		self.train_loader = torch.utils.data.DataLoader(train,batch_size=config.batch_size, shuffle=True)
+	def batch_generator(self,batch_size):
+		while 1:
+			batch = []
+			for i in xrange(batch_size):
+				batch.append(np.array(self.dataset[i][0]))
+
+			batch = np.array(batch)
+			yield batch
+
